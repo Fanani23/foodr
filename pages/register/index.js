@@ -1,7 +1,31 @@
 import Image from "next/image";
 import assets from "../../public/assets";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { registerAction } from "../../redux/actions/register";
 
-function register() {
+const register = () => {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const dispatch = useDispatch();
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    console.log(email);
+    console.log(password);
+    console.log(phone);
+    console.log(username);
+    let data = {
+      username,
+      email,
+      phone,
+      password,
+    };
+    dispatch(registerAction(data));
+  };
+
   return (
     <>
       <div className="container-xl mx-auto">
@@ -28,12 +52,18 @@ function register() {
                 </p>
               </div>
               <div className="flex flex-col gap-5 mt-10">
-                <form action="" className="flex flex-col gap-5">
+                <form
+                  onSubmit={handleRegister}
+                  id="form-login"
+                  className="flex flex-col gap-5"
+                >
                   <input
                     type="text"
                     id="username"
                     className="block mx-auto w-4/5 p-4 pl-10 text-sm text-gray-900 border-2 border-yellow-300 rounded-lg bg-white focus:ring-violet-500 focus:border-violet-500 light:bg-gray-700 light:border-gray-600 light:placeholder-gray-400 light:text-black light:focus:ring-violet-500 light:focus:border-violet-500"
                     placeholder="Username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     required
                   />
                   <input
@@ -41,6 +71,8 @@ function register() {
                     id="email"
                     className="block mx-auto w-4/5 p-4 pl-10 text-sm text-gray-900 border-2 border-yellow-300  rounded-lg bg-white focus:ring-violet-500 focus:border-violet-500 light:bg-gray-700 light:border-gray-600 light:placeholder-gray-400 light:text-black light:focus:ring-violet-500 light:focus:border-violet-500"
                     placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                   <input
@@ -48,6 +80,8 @@ function register() {
                     id="phone"
                     className="block mx-auto w-4/5 p-4 pl-10 text-sm text-gray-900 border-2 border-yellow-300  rounded-lg bg-white focus:ring-violet-500 focus:border-violet-500 light:bg-gray-700 light:border-gray-600 light:placeholder-gray-400 light:text-black light:focus:ring-violet-500 light:focus:border-violet-500"
                     placeholder="Phone number"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
                     required
                   />
                   <input
@@ -55,10 +89,14 @@ function register() {
                     id="password"
                     className="block mx-auto w-4/5 p-4 pl-10 text-sm text-gray-900 border-2 border-yellow-300  rounded-lg bg-white focus:ring-violet-500 focus:border-violet-500 light:bg-gray-700 light:border-gray-600 light:placeholder-gray-400 light:text-black light:focus:ring-violet-500 light:focus:border-violet-500"
                     placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
                   />
                   <button
+                    onClick={handleRegister}
                     type="submit"
+                    form="form-login"
                     className="block shadow mx-auto bg-amber-300 rounded w-4/5 py-4 px-3 mt-20 text-white leading-tight "
                   >
                     Masuk
@@ -83,6 +121,6 @@ function register() {
       </div>
     </>
   );
-}
+};
 
 export default register;

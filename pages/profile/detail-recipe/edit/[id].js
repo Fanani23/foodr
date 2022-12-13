@@ -1,10 +1,8 @@
-import Image from "next/image";
-import assets from "../../public/assets";
-import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Swal from "sweetalert2";
 import axios from "axios";
+import Link from "next/link";
 
 export const getServerSideProps = async (context) => {
   try {
@@ -29,27 +27,17 @@ export const getServerSideProps = async (context) => {
   }
 };
 
-const addRecipe = ({ token }) => {
+const EditRecipe = ({ token }) => {
+  const router = useRouter();
+
+  const { id } = router.query;
+
   const [title, setTitle] = useState("");
+  const [ingredients, setIngredients] = useState("");
   const [image, setImage] = useState([]);
   const [video, setVideo] = useState([]);
-  const [ingredients, setIngredients] = useState("");
 
-  const handlerImage = (e) => {
-    e.preventDefault();
-    setImage({
-      file: e.target.files[0],
-    });
-  };
-
-  const handlerVideo = (e) => {
-    e.preventDefault();
-    setVideo({
-      file: e.target.files[0],
-    });
-  };
-
-  const handlerAdd = async (e) => {
+  const handlerEdit = async (e) => {
     e.preventDefault();
     try {
       const data = new FormData();
@@ -58,17 +46,17 @@ const addRecipe = ({ token }) => {
       data.append("video", video);
       data.append("ingredients", ingredients);
       console.log(token);
-      await axios.post(`http://localhost:2103/recipe`, data, {
+      await axios.put(`http://localhost:2103/recipe/${id}`, data, {
         headers: {
           "content-type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
         },
       });
       console.log("Success create new recipe");
-      Swal.fire("Success", "Success create new recipe", "success");
+      Swal.fire("Success", "Success edit recipe", "success");
     } catch (error) {
       console.log(error);
-      Swal.fire("Failed", "Create new recipe failed", "error");
+      Swal.fire("Failed", "Edit recipe failed", "error");
     }
   };
 
@@ -79,13 +67,7 @@ const addRecipe = ({ token }) => {
           <div className="flex">
             <ul className="mt-12 ml-10 flex flex-row gap-20 text-purple-800 font-medium">
               <li>
-                <Link href="/home-login">Home</Link>
-              </li>
-              <li>
-                <Link href="/add-recipe">Add Recipe</Link>
-              </li>
-              <li>
-                <Link href="/profile">Profile</Link>
+                <Link href="/profile">Back</Link>
               </li>
             </ul>
           </div>
@@ -130,7 +112,7 @@ const addRecipe = ({ token }) => {
             />
             <button
               type="submit"
-              onClick={handlerAdd}
+              onClick={handlerEdit}
               className="block shadow mx-auto bg-amber-300 rounded w-4/5 py-4 px-3 mt-10 text-white leading-tight "
             >
               Save
@@ -164,4 +146,4 @@ const addRecipe = ({ token }) => {
   );
 };
 
-export default addRecipe;
+export default EditRecipe;

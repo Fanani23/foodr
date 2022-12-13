@@ -1,55 +1,54 @@
-import assets from "../public/assets";
+import assets from "../../public/assets";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
 import axios from "axios";
 
-const Home = () => {
+export const getServerSideProps = async (context) => {
+  try {
+    const { token } = context.req.cookies;
+    console.log(token, "token cookie");
+    if (!token) {
+      return {
+        redirect: {
+          destination: "/login",
+          permanent: true,
+        },
+      };
+    } else {
+      const getRecipes = await axios.get(`http://localhost:2103/recipe`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = getRecipes.data.data;
+      console.log(data);
+      return {
+        props: {
+          token: token,
+          data: data,
+        },
+      };
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const HomeLogin = ({ data }) => {
   const router = useRouter();
 
-  const [data, setData] = useState([]);
-
-  const [search, setSearch] = useState("");
-  const [sortby, setSortby] = useState("title");
-  const [sort, setSort] = useState("asc");
-  const [limit, setLimit] = useState("6");
-  const [page, setPage] = useState("1");
-
-  const getData = async (url) => {
+  const handlerLogout = async () => {
     try {
-      const res = await axios.get(url);
-      setData(res.data.result);
-      console.log(res.data.result);
+      const result = await fetch(`/api/logout`);
+      const { logout } = await result.json();
+      if (logout) {
+        console.log("Logout");
+      }
     } catch (error) {
       console.log(error);
     }
   };
-
-  useEffect(() => {
-    let url = `http://localhost:2103/recipe`;
-    if (sortby !== "title") {
-      url = `${url}?sortby=${sortby}`;
-    } else {
-      url = `${url}?sortby=title`;
-    }
-    if (limit !== "6") {
-      url = `${url}&limit=${limit}`;
-    } else {
-      url = `${url}&limit=6`;
-    }
-    if (search !== "") {
-      url = `${url}&search=${search}`;
-    }
-    if (page !== "1") {
-      url = `${url}&page=${page}`;
-    }
-    url = `${url}&sort=asc`;
-    getData(url);
-  }, [search, sort, sortby, limit, page]);
-  useEffect(() => {
-    getData();
-  }, []);
 
   return (
     <>
@@ -59,7 +58,7 @@ const Home = () => {
             <div className="flex">
               <ul className="mt-12 ml-10 flex flex-row gap-20 text-purple-800 font-medium">
                 <li>
-                  <Link href="/">Home</Link>
+                  <Link href="/home-login">Home</Link>
                 </li>
                 <li>
                   <Link href="/add-recipe">Add Recipe</Link>
@@ -90,7 +89,9 @@ const Home = () => {
             <div className="flex flex-row justify-end gap-5 mr-20">
               <Image className="mt-10" src={assets.uIcon} />
               <p className="mt-12 font-medium text-purple-800">
-                <Link href="/login">Login</Link>
+                <Link onClick={handlerLogout} href="/">
+                  Logout
+                </Link>
               </p>
             </div>
           </div>
@@ -119,23 +120,25 @@ const Home = () => {
             <Image src={assets.rPopular} width={300} height={500} />
           </div>
         </div>
-        <div className="container-xl mx-auto">
-          <section>
-            <div className="w-4/5 mt-10 mb-10 flex flex-wrap gap-10">
-              {data ? (
-                data.map((item) => (
-                  <div className="w-1/4 mx-auto rounded-xl shadow-md">
-                    <div>
-                      <img src={item.image} alt="" />
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <></>
-              )}
+        <section>
+          <div className="container-xl mx-auto">
+            <div className="flex flex-row gap-10 ml-16">
+              <Image src={assets.reYellow} />
+              <p className="font-semibold text-purple-800 text-2xl mt-14">
+                New Recipes
+              </p>
             </div>
-          </section>
-        </div>
+            <div className="w-4/5 mx-auto mt-10 mb-10 flex flex-wrap gap-10">
+              {data.map((item) => (
+                <div className="w-1/4 mx-auto flex rounded-sm shadow-sm">
+                  <div className="">
+                    <img src={item.image} className="rounded-t-sm" alt="" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
         <div className="container-xl mx-auto h-80 bg-yellow-400">
           <p className="text-center font-normal text-5xl text-purple-800 pt-20">
             Eat, Cook, Repeat
@@ -163,4 +166,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default HomeLogin;
